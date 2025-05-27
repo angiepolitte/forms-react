@@ -7,17 +7,37 @@ function App() {
     name: "",
     email: "",
   });
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is Required";
+    }
+    return newErrors;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Data Submitted", formData);
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      console.log("Form Data Submitted", formData);
+    }
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    if (errors[name]) {
+      const newErrors = { ...errors };
+      delete newErrorrs[name];
+      setErrors(newErrors);
+    }
   };
 
   return (
@@ -32,6 +52,8 @@ function App() {
             value={formData.name}
             onChange={handleChange}
           ></input>
+          {errors.name && <span style={{ color: "red" }}>{errors.name}</span>}
+          <br />
         </label>
 
         <label>
