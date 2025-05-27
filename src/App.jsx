@@ -1,69 +1,35 @@
-import { useState } from "react";
-
+import React, { useEffect } from "react";
 import "./App.css";
+import { useForm } from "react-hook-form";
 
 function App() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-  });
-  const [errors, setErrors] = useState({});
+  const { register, handleSubmit, watch } = useForm();
+  const onSubmit = (data) => console.log(data);
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is Required";
-    }
-    return newErrors;
-  };
+  // console.log(watch("name"));
+  // console.log(watch("email"));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-    } else {
-      console.log("Form Data Submitted", formData);
-    }
-  };
+  const watchedName = watch("name");
+  const watchedEmail = watch("email");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    if (errors[name]) {
-      const newErrors = { ...errors };
-      delete newErrorrs[name];
-      setErrors(newErrors);
-    }
-  };
+  useEffect(() => {
+    console.log("Name ", watchedName);
+  }, [watchedName]);
+
+  useEffect(() => {
+    console.log("Email ", watchedEmail);
+  }, [watchedEmail]);
 
   return (
     <div>
       <h1>Forms in React</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <label>
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          ></input>
-          {errors.name && <span style={{ color: "red" }}>{errors.name}</span>}
-          <br />
+          Name: <input {...register("name")} />
         </label>
-
         <label>
           Email:
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          ></input>
+          <input {...register("email")} />
         </label>
         <button type="submit">Submit</button>
       </form>
