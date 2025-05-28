@@ -6,9 +6,30 @@ function App() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm();
-  const onSubmit = (data) => console.log(data);
+    reset,
+    validate,
+  } = useForm({
+    mode: "onChange",
+  });
+  const existingUsernames = ["admin", "user123", "john"];
+  const checkIfUsernameExist = async (username) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return existingUsernames.includes(username);
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    reset();
+  };
+
+  const validateName = (value) => {
+    if (value !== "admin") {
+      return "Only admin is allowed";
+    }
+    return true;
+  };
 
   return (
     <div>
@@ -19,10 +40,21 @@ function App() {
           {/* <input {...register("name", { required: true, minLength: 2 })} /> */}
           <input
             {...register("name", {
-              required: "Name is required",
+              required: true,
               minLength: {
                 value: 2,
                 message: "Name should be at least 2 chars",
+              },
+              // validate: validateName,
+              validate: {
+                notAdmin: (value) =>
+                  value !== "admin" || "Admin is not allowed",
+                isNotNumber: (value) =>
+                  isNaN(value) || "Name cannot be a number",
+                checkUsername: async (value) => {
+                  const exist = await checkIfUsernameExist(value);
+                  return !exist || "Username already taken";
+                },
               },
             })}
           />
@@ -39,7 +71,36 @@ function App() {
           />
         </label>
         {errors.email && <p>Email is required</p>}
+
+        <label>
+          Password:
+          <input
+            type="password"
+            {...register("password", {
+              required: true,
+              minLength: 2,
+            })}
+          ></input>
+        </label>
+        {errors.password && <p>{errors.password.message}</p>}
+        <label>
+          Confirm Password:
+          <input
+            type="password"
+            {...register("confirmPassword", {
+              required: true,
+              minLength: 2,
+              validate: (value) =>
+                value === watch("password") || "Passwords do not match",
+            })}
+          ></input>
+        </label>
+        {errors.confirmPassword && <p>{errors.confirmPassword.message}</p>}
+        <br />
         <button type="submit">Submit</button>
+        <button type="button" onClick={() => reset()}>
+          Reset
+        </button>
       </form>
     </div>
   );
